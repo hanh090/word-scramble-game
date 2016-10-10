@@ -2,19 +2,50 @@
  * This template takes a single argument, a String containing a
  * message to display.
  *@
-@(message: String)
+@(message: String, characterSet: String)
 
 @*
  * Call the `main` template with two arguments. The first
  * argument is a `String` with the title of the page, the second
  * argument is an `Html` object containing the body of the page.
  *@
-@main("Welcome to Play") {
+@main("Word Scramble Game") {
 
     @*
      * Get an `Html` object by calling the built-in Play welcome
      * template and passing a `String` message.
      *@
-    @play20.welcome(message, style = "Java")
+   <h3>Your characters: @characterSet</h3> 
+   <form method="post" action="@routes.HomeController.validateWord()">
+	  <div class="form-group">
+	    <label for="email">Your word:</label>
+	    <input type="text" class="form-control" name="word-candidate">
+	  </div>
+	  <button type="submit" class="btn btn-primary">Submit</button>
+	</form>
 
+}{
+	<script type="text/javascript">
+		$(function(){
+			$('form').on('submit', function(event){
+				var data = $.param($(this).serializeArray());
+				$.ajax({
+					"method" : "post",
+					"url": $(this).attr('action'),
+					"data" : data,
+					"success" : function(response){
+						if(response.result){
+							alert("Correct");
+						}else{
+							alert("Wrong");
+						}
+					},
+					"error": function(data){
+						console.error(data);
+					}
+				})
+				event.preventDefault();
+			})
+		})
+	</script>
 }
