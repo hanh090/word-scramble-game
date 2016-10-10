@@ -16,28 +16,73 @@
      * template and passing a `String` message.
      *@
    <h3>Your characters: @characterSet</h3> 
-   <form method="post" action="@routes.HomeController.validateWord()">
-	  <div class="form-group">
-	    <label for="email">Your word:</label>
-	    <input type="text" class="form-control" name="word-candidate">
-	  </div>
-	  <button type="submit" class="btn btn-primary">Submit</button>
-	</form>
+   <div class="row">
+   	<div class="col-sm-12 col-md-6">
+	   <form method="post" action="@routes.HomeController.validateWord()">
+		  <div class="form-group">
+		    <label for="email">Your word:</label>
+		    <input type="text" class="form-control" name="word-candidate">
+		  </div>
+		  <button type="submit" data-action="@routes.HomeController.validateWord()" class="btn btn-primary">Submit</button>
+		  <button type="submit" data-action="@routes.HomeController.suggest()" class="btn btn-info suggest">Suggest</button>
+		</form>
+   	</div>
+   	<div class="col-sm-12 col-md-6 result">
+   		<div class="alert alert-success" role="alert" style="display:none;">
+   			<p class="message">Congrats, you have a correct word </p>
+   			<p><h4 class="value"></h4>
+   			<div class="word-definition">
+   			</div>
+   			
+   		</div>
+   		<div class="alert alert-danger" role="alert" style="display:none;">Sorry, your word is incorrect</div>
+   	</div>
+   </div>
 
 }{
 	<script type="text/javascript">
 		$(function(){
-			$('form').on('submit', function(event){
-				var data = $.param($(this).serializeArray());
+			var buildDefinitionHtml = function(type, gloss){
+				return ['<p>',
+							'<h5 class="type">',
+								type,
+							'</h5>',
+						'</p>',
+   						'<p>',
+   							'<h6 class="definition">',
+   								gloss,
+   							'</h6>',
+   						'</p>'].join(' ');
+			}
+			$(':submit').on('click', function(event){
+				var data = $.param($(this).parents('form').serializeArray());
+				var target = $(event.target);
 				$.ajax({
 					"method" : "post",
-					"url": $(this).attr('action'),
+					"url": $(event.target).data('action'),
 					"data" : data,
 					"success" : function(response){
+						var resultHtml = $('.result');
 						if(response.result){
-							alert("Correct");
+							var successHtml = resultHtml.find('.alert-success')
+							successHtml.show();
+							if(target.is('.suggest')){
+								successHtml.find('.message').text("You can use this word")
+							}else{
+								successHtml.find('.message').text("Congrats, you have a correct word")
+							}
+							var definitions = response.definitions;
+							var wordDefinitionHtml = successHtml.find('.word-definition');
+							wordDefinitionHtml.empty();
+							wordDefinitionHtml.siblings('.value').text(definitions[0].value);
+							definitions.forEach(function(definition){
+								wordDefinitionHtml.append(buildDefinitionHtml(definition.type, definition.gloss));
+							})
+							
+							resultHtml.find('.alert-danger').hide();
 						}else{
-							alert("Wrong");
+							resultHtml.find('.alert-success').hide();
+							resultHtml.find('.alert-danger').show();
 						}
 					},
 					"error": function(data){
