@@ -79,15 +79,8 @@ public class WordService {
 	}
 
 	public static void main(String[] args) throws JWNLException {
-		// Dictionary defaultResourceInstance =
-		// Dictionary.getDefaultResourceInstance();
-		// IndexWord indexWord = defaultResourceInstance.getIndexWord(POS.NOUN,
-		// "dog");
-		// List<Synset> synsetOffsets = indexWord.getSenses();
-		// for (Synset synset : synsetOffsets) {
-		// System.out.println(synset.getGloss());
-		// }
-		// permutation("dog");
+		WordService wordService = new WordService();
+		wordService.permutation("dog");
 	}
 
 	private List<String> permutation(String str) {
@@ -98,20 +91,19 @@ public class WordService {
 
 	private void permutation(String prefix, String str, List<String> result) {
 		if (str.isEmpty()) {
-			result.add(prefix + str);
+			System.out.println(prefix);
+			result.add(prefix);
 
 		} else {
-			for (int noMore = 0; noMore <= 1; noMore++) {
-				if (noMore == 0) {
-					for (int i = 0; i < str.length(); i++) {
-						permutation(prefix + str.charAt(i),
-								str.substring(i + 1, str.length()), result);
-					}
-				} else {
-					permutation(prefix, "", result);
-				}
+			// Generate pemutation for prefix
+			for (int i = 0; i < str.length(); i++) {
+				permutation(prefix + str.charAt(i),
+						str.substring(i + 1, str.length()), result);
 			}
+			permutation(prefix, "", result);
 		}
+		
+		
 
 	}
 }
