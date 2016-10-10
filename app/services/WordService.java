@@ -17,6 +17,7 @@ import net.sf.extjwnl.dictionary.Dictionary;
 public class WordService {
 
 	private Dictionary dictionary;
+
 	public WordService() {
 		try {
 			loadDictionary();
@@ -24,14 +25,16 @@ public class WordService {
 			e.printStackTrace();
 		}
 	}
+
 	private void loadDictionary() throws JWNLException {
 		dictionary = Dictionary.getDefaultResourceInstance();
 	}
-	public boolean validate(String word){
+
+	public boolean validate(String word) {
 		try {
 			for (POS pos : POS.values()) {
 				IndexWord indexWord = dictionary.getIndexWord(pos, word);
-				if(Objects.nonNull(indexWord)){
+				if (Objects.nonNull(indexWord)) {
 					return true;
 				}
 			}
@@ -40,13 +43,13 @@ public class WordService {
 		}
 		return false;
 	}
-	
-	public List<WordDefinition> getDefinitions(String word){
+
+	public List<WordDefinition> getDefinitions(String word) {
 		List<WordDefinition> result = new ArrayList<WordDefinition>();
 		try {
 			for (POS pos : POS.values()) {
 				IndexWord indexWord = dictionary.getIndexWord(pos, word);
-				if(Objects.nonNull(indexWord)){
+				if (Objects.nonNull(indexWord)) {
 					List<Synset> synsetOffsets = indexWord.getSenses();
 					for (Synset synset : synsetOffsets) {
 						WordDefinition definition = new WordDefinition();
@@ -62,41 +65,53 @@ public class WordService {
 		}
 		return result;
 	}
-	
-	public List<List<WordDefinition>> getAllCorrectWords(String word){
+
+	public List<List<WordDefinition>> getAllCorrectWords(String word) {
 		List<List<WordDefinition>> result = new ArrayList<List<WordDefinition>>();
 		List<String> allPossibleStr = permutation(word);
 		for (String possibleWord : allPossibleStr) {
-			if(validate(possibleWord)){
+			if (validate(possibleWord)) {
 				result.add(getDefinitions(possibleWord));
 			}
 		}
-		
+
 		return result;
 	}
-	
+
 	public static void main(String[] args) throws JWNLException {
-//		Dictionary defaultResourceInstance = Dictionary.getDefaultResourceInstance();
-//		IndexWord indexWord = defaultResourceInstance.getIndexWord(POS.NOUN, "dog");
-//		List<Synset> synsetOffsets = indexWord.getSenses();
-//		for (Synset synset : synsetOffsets) {
-//			System.out.println(synset.getGloss());
-//		}
-//		permutation("dog");
+		// Dictionary defaultResourceInstance =
+		// Dictionary.getDefaultResourceInstance();
+		// IndexWord indexWord = defaultResourceInstance.getIndexWord(POS.NOUN,
+		// "dog");
+		// List<Synset> synsetOffsets = indexWord.getSenses();
+		// for (Synset synset : synsetOffsets) {
+		// System.out.println(synset.getGloss());
+		// }
+		// permutation("dog");
 	}
-	
-	private List<String> permutation(String str) { 
+
+	private List<String> permutation(String str) {
 		List<String> result = new ArrayList<String>();
-	    permutation("", str, result); 
-	    return result;
+		permutation("", str, result);
+		return result;
 	}
 
 	private void permutation(String prefix, String str, List<String> result) {
-	    int n = str.length();
-	    if (n == 0) result.add(prefix);
-	    else {
-	        for (int i = 0; i < n; i++)
-	            permutation(prefix + str.charAt(i), str.substring(0, i) + str.substring(i+1, n), result);
-	    }
+		if (str.isEmpty()) {
+			result.add(prefix + str);
+
+		} else {
+			for (int noMore = 0; noMore <= 1; noMore++) {
+				if (noMore == 0) {
+					for (int i = 0; i < str.length(); i++) {
+						permutation(prefix + str.charAt(i),
+								str.substring(i + 1, str.length()), result);
+					}
+				} else {
+					permutation(prefix, "", result);
+				}
+			}
+		}
+
 	}
 }
